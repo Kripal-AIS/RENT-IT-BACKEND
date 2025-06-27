@@ -11,7 +11,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.4.6",
+    "nodemailer": "^7.0.3"
   }
 }
