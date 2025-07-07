@@ -106,7 +106,7 @@ export const findAllUsers = {
 
 export const deleteUser = {
     validator: async (req, res, next) => {
-        if (req.currUser._id.toString() !== req.params.id) {
+        if (!req?.currUser?.isAdmin && req.currUser._id.toString() !== req.params.id) {
             return res.status(400).send("You are not authenticated to delete this user");
         }
         next()

@@ -1,9 +1,8 @@
-
+import Agreement from "../Models/Agreement.js";
 import Product from "../Models/Product.js";
-
+import Review from "../Models/Review.js";
 import User from "../Models/User.js";
-
-
+import ProductRequest from "../Models/ProductRequest.js";
 
 export const createProduct = {
   validator: async (req, res, next) => {
@@ -90,8 +89,8 @@ export const updateProduct = {
       if (!findProduct) {
         return res.status(401).send("Product not found");
       }
-
-      if (findProduct._doc.renterid !== req.currUser._id.toString()) {
+      
+      if (!req?.currUser?.isAdmin && findProduct._doc.renterid !== req.currUser._id.toString()) {
         return res
           .status(400)
           .send("You are not authenticated to Update product");
@@ -141,7 +140,7 @@ export const findProduct = {
         return res.status(401).send("Renter not found");
       }
 
-    //   const reviews = await Review.find({ productid: product._id });
+      const reviews = await Review.find({ productid: product._id });
 
       const { password, ...other } = renter._doc;
 
@@ -150,7 +149,7 @@ export const findProduct = {
         renter: {
           ...other,
         },
-        // reviews: reviews || [],
+        reviews: reviews || [],
       };
 
       return res.status(200).json(responseData);
@@ -192,9 +191,11 @@ export const searchProduct = {
           ],
         };
 
-      let result = await Product.find(queryForSearch)
-      // const renter = await User.findById(result[0]?.renterid);
- 
+      const result = await Product.find(queryForSearch)
+      // .skip((page - 1)*limit)
+      // .limit(limit);
+
+
       return res.send(result);
     } catch (e) {
       console.log(e);
@@ -243,8 +244,8 @@ export const deleteProduct = {
       if (!product) {
         return res.status(400).send("Product not found");
       }
-
-      if (req.currUser._id.toString() !== product.renterid) {
+      const isOwner = req.currUser._id.toString() === product.renterid.toString();
+      if (!req.currUser.isAdmin && isOwner) {
         return res
           .status(400)
           .send("You are not authenticated to Delete product");
@@ -260,3 +261,110 @@ export const deleteProduct = {
   },
 };
 
+export const assignProduct = {
+  validator: async (req, res, next) => {
+    console.log(req.body);
+    if (!req.body.productid || !req.body.borrowerid || !req.body.revokedate) {
+      return res.status(400).send("Please fill out all the fields");
+    }
+    const findProduct = await Product.findById(req.body.productid);
+    if (!findProduct) {
+      return res.status(400).send("Product is not available");
+    }
+    if (findProduct.renterid !== req.currUser._id.toString())
+      return res
+        .status(400)
+        .send("You are not authenticated to assign this product");
+    if (findProduct.renterid === req.body.borrowerid) {
+      return res
+        .status(400)
+        .send("Renter user and Borrower user must be different");
+    }
+    if (findProduct.issued) {
+      return res.status(400).send("Product is already issued");
+    }
+    const findBorrower = await User.findById(req.body.borrowerid);
+    if (!findBorrower) return res.status(400).send("Borrower User not found");
+
+    req.borrower = findBorrower;
+    next();
+  },
+  controller: async (req, res, next) => {
+    try {
+      const today = new Date();
+      const revokedate = new Date(req.body.revokedate);
+      if (!!req.body?.reqId) {
+        await ProductRequest.findByIdAndDelete(req.body.reqId);
+      }
+      const addAgreement = await Agreement.create({
+        renterid: req.currUser._id.toString(),
+        borrowerid: req.body.borrowerid,
+        assigndate: today,
+        revokedate: revokedate,
+        productid: req.body.productid,
+      });
+      const updateProduct = await Product.findByIdAndUpdate(
+        req.body.productid,
+        {
+          issued: true,
+          borrowerid: req.body.borrowerid,
+          borrower: {
+            username: req.borrower.username,
+            avatar: req.borrower.avatar,
+          },
+          agreement: {
+            from: today,
+            to: revokedate,
+          },
+        }
+      );
+
+      res.status(200).send({
+        message: "Product assign successful",
+        ...addAgreement._doc,
+      });
+    } catch (e) {
+      // console.log(e);
+      return res.status(500).send("Product assign failed");
+    }
+  },
+};
+
+export const revokeProduct = {
+  validator: async (req, res, next) => {
+    if (!req.query.productid) {
+      return res.status(400).send("Please fill out all the fields");
+    }
+    // const today = new Date();
+    // if (today < req.query.revokedate) {
+    //     return res.status(400).send("You cannot revoke before revoke date");
+    // }
+    next();
+  },
+  controller: async (req, res) => {
+    try {
+      const findProduct = await Product.findById(req.query.productid);
+      if (!findProduct) {
+        return res.status(400).send("Product is not available");
+      }
+      if (findProduct.renterid !== req.currUser._id.toString())
+        return res
+          .status(400)
+          .send("You are not authenticated to revoke this product");
+
+      const updateProduct = await Product.findByIdAndUpdate(
+        req.query.productid,
+        {
+          issued: false,
+          borrowerid: "",
+        }
+      );
+
+      await Agreement.findOneAndDelete({ productid: req.query.productid });
+
+      res.status(200).send("Product revoke successful");
+    } catch (e) {
+      res.status(500).send("Revoking failed");
+    }
+  },
+};
