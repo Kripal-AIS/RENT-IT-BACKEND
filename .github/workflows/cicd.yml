@@ -1,4 +1,4 @@
-name : Deploy to Azure App Service
+name: Deploy to Azure App Service
 
 on:
   push:
@@ -21,8 +21,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build the project
-        run: npm start
+      - name: Fix vulnerabilities
+        run: npm audit fix || echo "No fixable vulnerabilities"
+
+      - name: Skip test step (optional)
+        run: echo "Skipping tests" # This prevents the default test script from running
+
+      # Optional: build step if you have a build script
+      # - name: Build the project
+      #   run: npm run build
 
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2
