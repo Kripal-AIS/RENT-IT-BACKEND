@@ -5,8 +5,6 @@ import dotenv from "dotenv";
 import CryptoJS from "crypto-js";
 
 dotenv.config();
-// import { BORROWER, RENTER } from "../Variables.js";
-
 
 const sendMail = async (mailContent, mailSubject, user) => {
     var transporter = nodemailer.createTransport({
