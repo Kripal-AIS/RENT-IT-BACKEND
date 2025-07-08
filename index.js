@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(cookieParser())
 app.use(cors({
   credentials: true,
-  origin: 'http://localhost:3000',
+  origin: ['http://localhost:3000','https://rent-it-frontend-ftahghbncybhbgdu.australiaeast-01.azurewebsites.net'],
   methods: ["GET", "PUT", "POST", "DELETE"],
 }))
 const port = process.env.PORT || 5000;
