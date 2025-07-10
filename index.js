@@ -26,7 +26,9 @@ const port = process.env.PORT || 5000;
 
 
 
-
+app.get("/", (req, res) => {
+  res.send("Welcome to Rent It API");
+})
 app.use("/api/auth", Auth);
 app.use("/api/user", User);
 app.use("/api/product", Product);
@@ -34,6 +36,7 @@ app.use("/api/review", Review)
 app.use('/api/query', Query)
 app.use('/api/request',ProductRequest)
 app.use("/api/message", Message);
+
 
 
 
