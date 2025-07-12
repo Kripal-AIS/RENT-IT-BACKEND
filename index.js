@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(cookieParser())
 app.use(cors({
   credentials: true,
-  origin: ['http://localhost:3000','https://rent-it-frontend-ftahghbncybhbgdu.australiaeast-01.azurewebsites.net'],
+  origin: ['http://localhost:3000','https://rent-it-frontend-ftahghbncybhbgdu.australiaeast-01.azurewebsites.net',"https://rent-it-frontend-6u0p3yt14-kripals-projects.vercel.app"],
   methods: ["GET", "PUT", "POST", "DELETE"],
 }))
 const port = process.env.PORT || 5000;
