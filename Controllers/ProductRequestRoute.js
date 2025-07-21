@@ -56,7 +56,8 @@ export const postRequest = {
         username: req.currUser.username,
         avatar: req.currUser.avatar,
         mobile: req.currUser.mobile,
-        email: req.currUser.email
+        email: req.currUser.email,
+        biddingPrice: req.body?.biddingPrice || 0
       });
 
       return res.send(productRequest);
