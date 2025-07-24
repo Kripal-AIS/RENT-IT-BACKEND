@@ -1,4 +1,5 @@
 import Agreement from "../Models/Agreement.js";
+import BiddingSession from "../Models/BiddingSession.js";
 import Product from "../Models/Product.js";
 import ProductRequest from "../Models/ProductRequest.js";
 
@@ -57,11 +58,20 @@ export const postRequest = {
         avatar: req.currUser.avatar,
         mobile: req.currUser.mobile,
         email: req.currUser.email,
-        biddingPrice: req.body?.biddingPrice || 0
+        biddingPrice: req.body?.biddingPrice || 0,
       });
+
+      const existingSession = await BiddingSession.findOne({
+        productId: prodId,
+        isCompleted: false
+      });
+      if (!existingSession) {
+        await BiddingSession.create({ productId: prodId, biddingDuration: req.currUser.biddingAcceptingTimeConfiguration || 30 });
+      }
 
       return res.send(productRequest);
     } catch (e) {
+      console.error("Error creating product request:", e);
       return res.status(500).send("Internal Error");
     }
   },
@@ -203,4 +213,50 @@ export const declineRequests = {
       return res.status(500).send("Error")
     }
   },
+};
+
+export const acceptHighestBid = {
+  controller: async (req, res) => {
+    try {
+      const { reqId } = req.query;
+      const baseRequest = await ProductRequest.findById(reqId);
+      if (!baseRequest) return res.status(404).send("Request not found");
+
+      const productId = baseRequest.product._id;
+      const allRequests = await ProductRequest.find({ "product._id": productId });
+
+      if (!allRequests.length) return res.status(404).send("No requests found");
+
+      const sorted = allRequests.sort((a, b) => b.biddingPrice - a.biddingPrice);
+      const highestBid = sorted[0];
+
+      const mockReq = {
+        query: { reqId: highestBid._id.toString() },
+        currUser: { _id: highestBid.owner._id.toString() }
+      };
+
+      const mockRes = {
+        status: () => ({ send: () => {}, json: () => {} })
+      };
+
+      await acceptRequest.controller(mockReq, mockRes);
+
+      // Delete other bids
+      const loserIds = sorted.filter(r => !r._id.equals(highestBid._id)).map(r => r._id);
+      if (loserIds.length > 0) await ProductRequest.deleteMany({ _id: { $in: loserIds } });
+
+      if (res) {
+        res.status(200).json({
+          message: "Bidding completed",
+          winner: {
+            requestId: highestBid._id,
+            bid: highestBid.biddingPrice
+          }
+        });
+      }
+    } catch (e) {
+      console.error(e);
+      res?.status(500).send("Error during bidding");
+    }
+  }
 };

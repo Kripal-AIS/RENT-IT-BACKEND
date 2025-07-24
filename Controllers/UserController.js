@@ -35,7 +35,8 @@ export const updateUser = {
                     avatar: req.body.avatar,
                     emailverified,
                     mobileverified,
-                    password: encryptedPassword
+                    password: encryptedPassword,
+                    biddingAcceptingTimeConfiguration: req.body.biddingAcceptingTimeConfiguration
                 }, { new: true });
 
                 const { password, ...others } = updateUser._doc;
@@ -48,7 +49,8 @@ export const updateUser = {
                     location: req.body.location,
                     avatar: req.body.avatar,
                     emailverified,
-                    mobileverified
+                    mobileverified,
+                    biddingAcceptingTimeConfiguration: req.body.biddingAcceptingTimeConfiguration
                 }, { new: true });
 
                 const { password, ...others } = updateUser._doc;

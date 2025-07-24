@@ -10,6 +10,7 @@ import ProductRequest from "./Routes/ProductRequestRoute.js";
 import Review from "./Routes/ReviewRoute.js";
 import Query from "./Routes/QueryRoute.js";
 import Message from "./Routes/MessageRoute.js";
+import './Cron/biddingCron.js'; // Triggers auto-bid check every minute
 
 dotenv.config();
 const app = express();
