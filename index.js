@@ -10,7 +10,8 @@ import ProductRequest from "./Routes/ProductRequestRoute.js";
 import Review from "./Routes/ReviewRoute.js";
 import Query from "./Routes/QueryRoute.js";
 import Message from "./Routes/MessageRoute.js";
-
+import http from "http";
+import { Server } from "socket.io";
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -48,7 +49,34 @@ mongoose.connect(process.env.MONGO_URL)
   .catch((e) => console.log("Db Connection Failed"));
 
 
-const server = app.listen(port, () => {
+const httpServer = http.createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: ['http://localhost:3000', 'https://rent-it-frontend-ftahghbncybhbgdu.australiaeast-01.azurewebsites.net', "https://rent-it-frontend-6u0p3yt14-kripals-projects.vercel.app"],
+    credentials: true
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  // Join chat room
+  socket.on('joinRoom', ({ roomId }) => {
+    socket.join(roomId);
+    console.log(`User joined room: ${roomId}`);
+  });
+
+  // Handle incoming message
+  socket.on('sendMessage', ({ roomId, message, senderId }) => {
+    io.to(roomId).emit('receiveMessage', { message, senderId });
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+httpServer.listen(port, () => {
   console.log(`Server is Listening on PORT ${port}`);
-})
+});
 
