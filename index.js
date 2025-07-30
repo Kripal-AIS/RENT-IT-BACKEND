@@ -61,10 +61,15 @@ io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
   // Join chat room
-  socket.on('joinRoom', ({ roomId }) => {
-    socket.join(roomId);
-    console.log(`User joined room: ${roomId}`);
-  });
+  socket.on('joinRoom', (roomId) => {
+  if (!roomId) {
+    console.log('joinRoom called without roomId');
+    return;
+  }
+  socket.join(roomId);
+  console.log(`User joined room: ${roomId}`);
+});
+
 
   // Handle incoming message
   socket.on('sendMessage', ({ roomId, message, senderId }) => {
