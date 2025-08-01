@@ -22,6 +22,10 @@ const AgreementSchema = new Mongoose.Schema(
             type: String,
             required: true,
             unique: true
+        },
+         isEmailReminderSent: {
+            type: Boolean,
+            default: false
         }
     }, { timestamps: true }
 )

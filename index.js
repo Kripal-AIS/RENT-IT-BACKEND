@@ -11,6 +11,8 @@ import Review from "./Routes/ReviewRoute.js";
 import Query from "./Routes/QueryRoute.js";
 import Message from "./Routes/MessageRoute.js";
 import './Cron/biddingCron.js'; // Triggers auto-bid check every minute
+import './Cron/sendReminderEmailsCron.js'; // Triggers reminder emails
+ 
 
 dotenv.config();
 const app = express();
