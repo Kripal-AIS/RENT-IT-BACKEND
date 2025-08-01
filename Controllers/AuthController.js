@@ -6,7 +6,7 @@ import CryptoJS from "crypto-js";
 
 dotenv.config();
 
-const sendMail = async (mailContent, mailSubject, user) => {
+export const sendMail = async (mailContent, mailSubject, user) => {
     var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
