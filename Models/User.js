@@ -51,6 +51,10 @@ const UserSchema = new Mongoose.Schema(
         isAdmin:{
             type:Boolean,
             default:false
+        },
+        biddingAcceptingTimeConfiguration: {
+            type: Number,
+            default: 30 // optional, in minutes
         }
     }, { timestamps: true }
 )

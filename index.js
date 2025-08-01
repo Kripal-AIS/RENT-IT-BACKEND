@@ -12,6 +12,10 @@ import Query from "./Routes/QueryRoute.js";
 import Message from "./Routes/MessageRoute.js";
 import http from "http";
 import { Server } from "socket.io";
+import './Cron/biddingCron.js'; // Triggers auto-bid check every minute
+import './Cron/sendReminderEmailsCron.js'; // Triggers reminder emails
+ 
+
 dotenv.config();
 const app = express();
 app.use(express.json());
