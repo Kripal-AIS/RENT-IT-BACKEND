@@ -21,13 +21,13 @@ pipeline {
             }
         }
 
-        stage('Run Lint') {
+        stage('Deploy') {
             steps {
                echo 'Success'
             }
         }
 
-        stage('Skip Tests') {
+        stage('Testing') {
             steps {
                 echo 'Skipping tests'
             }
