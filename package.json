@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"No tests defined\" && exit 0",
-    "start": "node index.js"
+    "start": "node index.js",
+     "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
